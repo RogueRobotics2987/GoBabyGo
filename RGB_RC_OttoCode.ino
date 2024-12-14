@@ -38,10 +38,11 @@ int togglePin = 3;  // ch3
 int invertStickX = 1; 
 int invertStickY = 1;// comment
 
-#define NUMPIXELS 53// Number of LEDs in strip
+#define NUMPIXELS 144// Number of LEDs in strip
 #define DATAPIN    9
 #define CLOCKPIN   8
 Adafruit_DotStar strip(NUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
+
 
 // Debug Over Serial - Requires a FTDI cable
 boolean DEBUG = true;
@@ -52,7 +53,7 @@ Servo motor1;
 Servo motor2;
 
 void lights_green (){
-    strip.fill(strip.Color(0, 0, 50));
+    strip.fill(strip.Color(0, 50, 0));
     strip.show();
   }
 
@@ -77,6 +78,7 @@ void setup() {
   pinMode(togglePin, INPUT);
   motor1.attach(MOTOR_1);
   motor2.attach(MOTOR_2);
+  strip.begin();
   if(SPEED_POTENTIOMETER){ pinMode(SPEED_POT, INPUT);}
   
 //  if(DEBUG) Serial.begin(9600);
@@ -139,7 +141,7 @@ void loop() {
 
     arcadeDrive(moveValue, rotateValue);
   
-    //debugF();
+    debugF();
     delay(60); //Make loop run approximately 50hz
   }
   else if( driveMode == parentControl){
