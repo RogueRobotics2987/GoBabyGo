@@ -38,11 +38,19 @@ int togglePin = 3;  // ch3
 int invertStickX = 1; 
 int invertStickY = 1;// comment
 
-#define NUMPIXELS 144// Number of LEDs in strip
-#define DATAPIN    9
-#define CLOCKPIN   8
-Adafruit_DotStar strip(NUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
+#define NUM_PIXELS 144// Number of LEDs in strip
+#define DATA_PIN    9
+#define CLOCK_PIN   8
+Adafruit_DotStar strip(NUM_PIXELS, DATA_PIN, CLOCK_PIN, DOTSTAR_BGR);
 
+const int LED_CHAIN_COUNT = 12; // How many LEDs to include
+const int LED_BRIGHTNESS = 64; // brightness for the LEDs (0-255)
+const uint32_t STATIONARY_COLOR = strip.Color(50, 0, 0);  // RED
+const uint32_t FORWARD_COLOR = strip.Color(0, 50, 0);     // GREEN
+const uint32_t REVERSE_COLOR = strip.Color(50, 50, 0);    // YELLOW
+int ledIndex = 0;
+int reverseLEDIndex = NUM_PIXELS - 1;
+int ledCount = 1;
 
 // Debug Over Serial - Requires a FTDI cable
 boolean DEBUG = true;
@@ -51,21 +59,6 @@ boolean DEBUG = true;
 
 Servo motor1;
 Servo motor2;
-
-void lights_green (){
-    strip.fill(strip.Color(0, 50, 0));
-    strip.show();
-  }
-
-  void lights_red(){
-    strip.fill(strip.Color(50, 0, 0));
-    strip.show();
-  }
-
-  void lights_yellow(){
-    strip.fill(strip.Color(50, 50, 0));
-    strip.show();
-  }
 
 void setup() {
   while (!Serial);  // required for Flora & Micro
@@ -79,6 +72,7 @@ void setup() {
   motor1.attach(MOTOR_1);
   motor2.attach(MOTOR_2);
   strip.begin();
+  strip.setBrightness(LED_BRIGHTNESS);
   if(SPEED_POTENTIOMETER){ pinMode(SPEED_POT, INPUT);}
   
 //  if(DEBUG) Serial.begin(9600);
@@ -229,15 +223,40 @@ void drive(int left, int right){
   else motor2.write(REVERSE_PULSE+speed2);
   prevRight = speed2;
   
-  if(speed1 + speed2 < 0){
-    lights_yellow();
+  if(speed1 + speed2 < 0) {
+    lightLEDs(REVERSE_COLOR);
+  } 
+  else if (speed1 + speed2 > 0) {
+    lightLEDs(FORWARD_COLOR);
+  } else {
+    lightLEDs(STATIONARY_COLOR);
   }
-  else if (speed1 + speed2 > 0){
-    lights_green();
+}
+
+void lightLEDs(uint32_t color) {
+  strip.clear();
+  if (ledCount > 0) { // Alow all the lights to go out since strip.fill with 0 index and 0 count lights the full strip
+    strip.fill(color, ledIndex, ledCount);
+    strip.fill(color, reverseLEDIndex, ledCount);
   }
-  else
-  {
-    lights_red();
+  strip.show();
+
+  if (ledIndex == NUM_PIXELS) { // We've reached the end so we reset
+    ledIndex = 0;
+    reverseLEDIndex = NUM_PIXELS;
+    ledCount = 0;
+  } else if (ledIndex + ledCount == NUM_PIXELS) { // We're getting close to the end so we lower our count
+    ledIndex++;
+    ledCount--;
+    if (reverseLEDIndex > 0) {
+      reverseLEDIndex--;
+    }
+  } else if (ledCount < LED_CHAIN_COUNT) { // We're just starting out so we up the count and reduce reverse index
+    ledCount++;
+    reverseLEDIndex--;
+  } else { // We're in the middle so this part is easy
+    ledIndex++;
+    reverseLEDIndex--;
   }
 }
 
