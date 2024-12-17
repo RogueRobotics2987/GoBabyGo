@@ -38,11 +38,17 @@ int togglePin = 3;  // ch3
 int invertStickX = 1; 
 int invertStickY = 1;// comment
 
-#define NUMPIXELS 144// Number of LEDs in strip
+// #define NUMPIXELS 228// Number of LEDs in strip
+#define ACTNUMPIXELS 144 // actual number of pixels for initializing strip
+#define NUMPIXELS 100// Number of LEDs in strip
 #define DATAPIN    9
 #define CLOCKPIN   8
-Adafruit_DotStar strip(NUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
+Adafruit_DotStar strip(ACTNUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
 
+int led1 = NUMPIXELS / 2 -1; //first half of strip
+int led2 = NUMPIXELS / 2; // second half of strip
+int GROUPWIDTH = 6;
+double PULSEBRIGHTNESS = //HOW MUCH;
 
 // Debug Over Serial - Requires a FTDI cable
 boolean DEBUG = true;
@@ -52,19 +58,66 @@ boolean DEBUG = true;
 Servo motor1;
 Servo motor2;
 
-void lights_green (){
+void lights_green ()
+{
+    debug("green", 1);
     strip.fill(strip.Color(0, 50, 0));
     strip.show();
   }
 
-  void lights_red(){
+  void lights_red()
+  {
+    debug("red", 1);
     strip.fill(strip.Color(50, 0, 0));
     strip.show();
   }
 
-  void lights_yellow(){
+  void lights_yellow()
+  {
+    debug("yellow", 1);
     strip.fill(strip.Color(50, 50, 0));
     strip.show();
+  }
+
+  void patternChase()
+  {
+    // second half of strip
+    led2 = led2 + GROUPWIDTH;
+
+    for(int i = led2 - GROUPWIDTH; i < led2; i++)
+    {
+      strip.setPixelColor(i, 30, 0, 0);
+    }
+    // first half of strip
+    led1 = led1 - GROUPWIDTH;
+
+    for(int i = led1 + GROUPWIDTH; i > led1; i--)
+    {
+      strip.setPixelColor(i, 30, 0, 0);
+    }
+    
+    strip.show();
+    
+    if(led2 >= NUMPIXELS)
+    {
+      led2 = NUMPIXELS /2;
+      strip.clear();
+    }
+
+    if(led1 <= 0)
+    {
+      led1 = NUMPIXELS /2 - 1;
+      strip.clear();
+    }
+  }
+
+  void lightPulse()
+  {
+    strip.fill(strip.color(50, 0, 0));
+
+    for(double )
+
+    //take inthe pulse brightness and subtract 1 each time till it gets to 0 the add till 50 loop
   }
 
 void setup() {
@@ -142,7 +195,7 @@ void loop() {
     arcadeDrive(moveValue, rotateValue);
   
     debugF();
-    delay(60); //Make loop run approximately 50hz
+   
   }
   else if( driveMode == parentControl){
    
@@ -182,9 +235,11 @@ void loop() {
     arcadeDrive(moveValue, rotateValue);
   
     debugF();
-    delay(60); //Make loop run approximately 50hz
   
   }
+
+  delay(20); //Make loop run approximately 50hz
+
 }
 
 void arcadeDrive(int moveValue, int rotateValue) {
@@ -229,16 +284,29 @@ void drive(int left, int right){
   else motor2.write(REVERSE_PULSE+speed2);
   prevRight = speed2;
   
-  if(speed1 + speed2 < 0){
+  /*if(speed1 + speed2 < 0)
+  {
     lights_yellow();
   }
-  else if (speed1 + speed2 > 0){
+  else if (speed1 + speed2 > 0)
+  {
     lights_green();
   }
   else
   {
     lights_red();
+  }*/
+
+  if(speed1 != 0 || speed2 != 0 )
+  {
+    patternChase();
+    //lights_red();
+  }else
+  {
+    lights_red();
   }
+
+  //lights_red();
 }
 
 void debug(String s, int value){
