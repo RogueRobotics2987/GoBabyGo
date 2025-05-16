@@ -48,7 +48,7 @@ Adafruit_DotStar strip(ACTNUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
 int led1 = NUMPIXELS / 2 -1; //first half of strip
 int led2 = NUMPIXELS / 2; // second half of strip
 int GROUPWIDTH = 6;
-double PULSEBRIGHTNESS = //HOW MUCH;
+//double PULSEBRIGHTNESS = //HOW MUCH;
 
 // Debug Over Serial - Requires a FTDI cable
 boolean DEBUG = true;
@@ -111,14 +111,14 @@ void lights_green ()
     }
   }
 
-  void lightPulse()
-  {
-    strip.fill(strip.color(50, 0, 0));
-
-    for(double )
-
-    //take inthe pulse brightness and subtract 1 each time till it gets to 0 the add till 50 loop
-  }
+//  void lightPulse()
+//  {
+//    strip.fill(strip.Color(50, 0, 0));
+//
+//    for(double )
+//
+//    //take inthe pulse brightness and subtract 1 each time till it gets to 0 the add till 50 loop
+//  }
 
 void setup() {
   while (!Serial);  // required for Flora & Micro
